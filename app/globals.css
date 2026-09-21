@@ -74,3 +74,6 @@ footer { max-width: var(--max); margin: 0 auto; padding: 22px; color: #6f7772; f
   .question { font-size: 19px; }
   .answer-top { align-items: flex-start; flex-direction: column; }
 }
+
+.perf { display:flex; flex-wrap:wrap; gap:8px; padding:14px 20px; border-bottom:1px solid var(--line); }
+.perf span { font:600 11px ui-monospace, monospace; color:var(--muted); background:#0d0f0e; border:1px solid var(--line); padding:6px 8px; border-radius:7px; }
