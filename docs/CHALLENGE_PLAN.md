@@ -44,7 +44,7 @@ A command can therefore be "correct" and still be wrong for the user's machine.
 - [ ] Create Sanity project
 - [ ] Enable Context + Knowledge Bases
 - [x] Add 4–8 focused sources
-- [ ] Build Knowledge Base
+- [x] Build Knowledge Base
 - [ ] Resolve/document at least one real conflict
 - [ ] Connect live endpoint
 - [ ] Validate 8–12 benchmark questions
