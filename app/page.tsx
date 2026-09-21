@@ -133,7 +133,7 @@ export default function Home() {
       <div className="app-shell">
         <aside className="sidebar">
           <div className="sidebar-brand">
-            <span className="brand-mark">&gt;_</span>
+            <span className="brand-mark">↗</span>
             <div>
               <strong>Signpost</strong>
               <small>checks Linux advice against your setup</small>
@@ -141,10 +141,10 @@ export default function Home() {
           </div>
 
           <section className="side-section">
-            <div className="side-heading">System profile</div>
+            <div className="side-heading">Your computer</div>
 
             <label>
-              <span>Distro</span>
+              <span>Linux type</span>
               <input value={profile.distro} onChange={(e) => update('distro', e.target.value)} />
             </label>
             <label>
@@ -156,13 +156,13 @@ export default function Home() {
               <input value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} />
             </label>
             <label>
-              <span>Session</span>
+              <span>Display mode</span>
               <input value={profile.session} onChange={(e) => update('session', e.target.value)} />
             </label>
             <label>
-              <span>Hardware</span>
+              <span>Hardware notes</span>
               <input
-                placeholder="optional notes"
+                placeholder="optional"
                 value={profile.hardware}
                 onChange={(e) => update('hardware', e.target.value)}
               />
@@ -171,14 +171,14 @@ export default function Home() {
             <div className="profile-summary">
               <span className="status-led"/>
               <div>
-                <small>Active context</small>
+                <small>Current setup</small>
                 <code>{profileSummary || 'incomplete'}</code>
               </div>
             </div>
           </section>
 
           <section className="side-section">
-            <div className="side-heading">Quick tests</div>
+            <div className="side-heading">Example questions</div>
             <div className="example-list">
               {examples.map((item, i) => (
                 <button type="button" key={item} onClick={() => setQuestion(item)}>
@@ -190,9 +190,9 @@ export default function Home() {
           </section>
 
           <section className="side-section side-status">
-            <div className="side-heading">Runtime</div>
-            <div className="status-row"><span>Knowledge</span><strong>Sanity Context</strong></div>
-            <div className="status-row"><span>Status</span><strong className={loading ? 'status-live' : 'status-ready'}>{loading ? 'Running' : 'Ready'}</strong></div>
+            <div className="side-heading">Connection</div>
+            <div className="status-row"><span>Sources</span><strong>Connected</strong></div>
+            <div className="status-row"><span>Status</span><strong className={loading ? 'status-live' : 'status-ready'}>{loading ? 'Checking…' : 'Ready'}</strong></div>
             {meta?.provider && <div className="status-row"><span>Provider</span><strong>{meta.provider}</strong></div>}
             {meta?.model && <div className="status-row"><span>Model</span><strong>{meta.model}</strong></div>}
             {meta && (
@@ -204,7 +204,7 @@ export default function Home() {
             )}
           </section>
 
-          <div className="sidebar-foot">Signpost v0.1 · DEV × Sanity</div>
+          <div className="sidebar-foot">Signpost · source-grounded Linux help</div>
         </aside>
 
         <section className="terminal-window" aria-label="Signpost terminal">
@@ -214,14 +214,14 @@ export default function Home() {
               <span className="traffic-yellow"/>
               <span className="traffic-green"/>
             </div>
-            <div className="window-title">Signpost — zsh — 120×38</div>
-            <div className="window-actions" aria-hidden="true">⌘</div>
+            <div className="window-title">Signpost</div>
+            <div className="window-actions" aria-hidden="true">●</div>
           </header>
 
           <div className="terminal-toolbar">
             <div className="terminal-tab">
-              <span className="terminal-icon">&gt;_</span>
-              <span>Terminal</span>
+              <span className="terminal-icon">↗</span>
+              <span>Troubleshooting</span>
             </div>
 
             <div className="toolbar-context">
@@ -237,57 +237,42 @@ export default function Home() {
                 className="toolbar-button run-button"
                 disabled={loading || !question.trim()}
               >
-                {loading ? 'Running…' : '▶ Run'}
+                {loading ? 'Checking…' : 'Check this problem'}
               </button>
             </div>
           </div>
 
           <form id="signpost-form" className="terminal-form" onSubmit={submit}>
             <div className="terminal-body">
-              <div className="line">
-                <span className="prompt-user">mika</span><span className="prompt-at">@</span><span className="prompt-host">linux</span>
-                <span className="cwd"> ~/signpost</span><span className="shell"> % </span>
-                <span>./signpost</span>
-              </div>
-              <div className="stdout banner">Signpost 0.1.0</div>
-              <div className="stdout muted">Linux troubleshooting that checks its work against your setup.</div>
-              <div className="blank"/>
-
-              <div className="line">
-                <span className="prompt-user">mika</span><span className="prompt-at">@</span><span className="prompt-host">linux</span>
-                <span className="cwd"> ~/signpost</span><span className="shell"> % </span>
-                <span>signpost ask</span>
+              <div className="intro-block">
+                <div className="stdout banner">What’s going wrong?</div>
+                <div className="stdout muted">Describe the Linux problem in your own words. Signpost will check the advice against the setup shown on the left.</div>
               </div>
 
               <div className="question-line">
-                <span className="continuation">&gt; </span>
+                <span className="continuation">› </span>
                 <textarea
                   className="question"
                   rows={4}
                   aria-label="Troubleshooting question"
-                  placeholder="Describe the Linux problem you want Signpost to check…"
+                  placeholder="Example: My laptop keyboard won’t turn off, but I still need my USB keyboard to work."
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                 />
               </div>
 
               <div className="terminal-hint">
-                <span>Enter your question, then click Run</span>
-                <kbd>⌘↵</kbd>
+                <span>No commands needed. Just describe the problem and click “Check this problem”.</span>
               </div>
 
               {(loading || error || answer) && (
                 <div className="output">
-                  <div className="line">
-                    <span className="prompt-user">mika</span><span className="prompt-at">@</span><span className="prompt-host">linux</span>
-                    <span className="cwd"> ~/signpost</span><span className="shell"> % </span>
-                    <span>signpost run</span>
-                  </div>
+                  <div className="stdout output-heading">Checking your setup and sources…</div>
 
                   {loading && (
                     <>
-                      <div className="stdout"><span className="info">[info]</span> querying Sanity Context Knowledge Base...</div>
-                      <div className="stdout"><span className="info">[info]</span> checking applicability against {profileSummary}<span className="dots">...</span></div>
+                      <div className="stdout"><span className="info">●</span> Reading trusted Linux documentation…</div>
+                      <div className="stdout"><span className="info">●</span> Comparing it with {profileSummary}<span className="dots">...</span></div>
                     </>
                   )}
 
@@ -302,11 +287,11 @@ export default function Home() {
                     <div className="answer-document">
                       {(rightDirection || whyItFits) && (
                         <section className="answer-section">
-                          <div className="stdout success">[ok] right_direction</div>
+                          <div className="stdout success">✓ Right direction</div>
                           {rightDirection && <div className="section-copy"><SectionCopy markdown={rightDirection.body}/></div>}
                           {whyItFits && (
                             <div className="why-panel">
-                              <div className="stdout success">[ok] why_it_fits</div>
+                              <div className="stdout success">Why this fits your setup</div>
                               <SectionCopy markdown={whyItFits.body}/>
                             </div>
                           )}
@@ -315,21 +300,21 @@ export default function Home() {
 
                       {wrongTurns && (
                         <section className="answer-section">
-                          <div className="stdout skip">[skip] wrong_turns</div>
+                          <div className="stdout skip">Things to avoid</div>
                           <div className="section-copy"><SectionCopy markdown={wrongTurns.body}/></div>
                         </section>
                       )}
 
                       {confidence && (
                         <section className="answer-section meta-section">
-                          <div className="stdout meta">[meta] confidence</div>
+                          <div className="stdout meta">Confidence</div>
                           <SectionCopy markdown={confidence.body}/>
                         </section>
                       )}
 
                       {sources && (
                         <section className="answer-section meta-section">
-                          <div className="stdout meta">[meta] sources</div>
+                          <div className="stdout meta">Sources</div>
                           <SectionCopy markdown={sources.body}/>
                         </section>
                       )}
@@ -341,14 +326,9 @@ export default function Home() {
                   )}
 
                   {!loading && !error && answer && (
-                    <>
-                      <div className="blank"/>
-                      <div className="line return-prompt">
-                        <span className="prompt-user">mika</span><span className="prompt-at">@</span><span className="prompt-host">linux</span>
-                        <span className="cwd"> ~/signpost</span><span className="shell"> % </span>
-                        <span className="cursor" aria-hidden="true"/>
-                      </div>
-                    </>
+                    <div className="done-line">
+                      <span className="status-led"/> Ready for another question
+                    </div>
                   )}
                 </div>
               )}
