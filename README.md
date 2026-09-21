@@ -57,7 +57,7 @@ Then open `http://localhost:3000`.
 SANITY_CONTEXT_MCP_URL=...
 SANITY_ORGANIZATION_TOKEN=...
 ANTHROPIC_API_KEY=...
-AI_MODEL=claude-sonnet-5
+AI_MODEL=claude-sonnet-4-6
 ```
 
 The Sanity organization token needs **Context Viewer** permission and must remain server-side.
@@ -69,10 +69,10 @@ Read these in order:
 1. `docs/KNOWLEDGE_BASE.md`
 2. `docs/CHALLENGE_PLAN.md`
 3. `docs/DEMO_SCRIPT.md`
+4. `docs/ARTICLE_NOTES.md` — running build log for the eventual DEV article
 
 Then create the Sanity project + first focused Knowledge Base. Do not broaden the corpus until one conflict-heavy demo question works end to end.
 
 ## Challenge submission note
 
 The DEV challenge requires the submission to include the Sanity project ID or a public dataset URL so the Sanity team can inspect how structured content was used. Add that before publishing.
-# signpost
