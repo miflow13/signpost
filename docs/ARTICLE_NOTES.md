@@ -182,3 +182,29 @@ Before involving the model, a dedicated `/api/health/context` route was added so
 3. the MCP endpoint exposes Knowledge Base tools.
 
 This keeps debugging layered: if retrieval fails, Signpost can distinguish a Sanity configuration problem from a model/API problem instead of treating the whole agent call as one black box.
+
+
+### Model provider switch: Anthropic → Gemini
+
+The initial scaffold used Anthropic, but that introduced a practical barrier: the challenge build should be reproducible without requiring a paid API account.
+
+Signpost's model layer was therefore switched to the Google Generative AI provider through the Vercel AI SDK, using **Gemini 3.8 Flash** on the free tier.
+
+This change reinforced an architectural goal that became clearer during development:
+
+```text
+Sanity = knowledge + retrieval layer
+Gemini = reasoning + tool-calling layer
+Signpost = product behavior + context policy
+```
+
+The model provider is intentionally replaceable. Sanity remains the source-grounding layer, while the LLM is responsible for interpreting the retrieved material and deciding which guidance fits the user's system context.
+
+Implementation changes:
+- `@ai-sdk/anthropic` removed
+- `@ai-sdk/google` added
+- server route now uses `google(modelName)`
+- environment variable changed to `GOOGLE_GENERATIVE_AI_API_KEY`
+- default model changed to `gemini-3.8-flash`
+
+This also made the v0.1 challenge demo possible without adding a paid API dependency.
