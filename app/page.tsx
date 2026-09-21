@@ -71,15 +71,6 @@ export default function Home() {
     [profile],
   );
 
-  const profileChips = useMemo(
-    () => [
-      [profile.distro, profile.version].filter(Boolean).join(' '),
-      profile.desktop,
-      profile.session,
-    ].filter(Boolean),
-    [profile],
-  );
-
   const answerSections = useMemo(() => splitAnswer(answer), [answer]);
 
   const section = (name: string) =>
@@ -122,149 +113,164 @@ export default function Home() {
 
   return (
     <main>
-      <div className="terminal-window">
-        <div className="terminal-titlebar">
-          <div className="window-controls" aria-hidden="true">
-            <span/>
-            <span/>
-            <span/>
-          </div>
-          <div className="terminal-title">signpost — context-check</div>
-          <div className="terminal-path">~/signpost</div>
-        </div>
+      <section className="terminal" aria-label="Signpost terminal">
+        <header className="terminal-titlebar">
+          <div className="window-controls" aria-hidden="true"><span/><span/><span/></div>
+          <span>signpost</span>
+          <span>~/signpost</span>
+        </header>
 
-        <nav>
-          <div className="brand"><span>↗</span> signpost</div>
-          <div className="nav-note">context-aware linux troubleshooting</div>
-        </nav>
-
-        <section className="hero">
-          <div className="terminal-command"><span className="prompt">user@linux:~$</span> ./signpost --check-setup</div>
-          <h1>Linux troubleshooting that checks its work <span>against your setup.</span></h1>
-          <p>
-            Tell Signpost what you’re running. It checks the documentation against your actual
-            distro, desktop, session, and hardware before pointing you toward a fix.
-          </p>
-          <div className="cursor-line"><span className="prompt">signpost&gt;</span><span className="cursor" aria-hidden="true"/></div>
-        </section>
-
-        <section className="workspace">
-        <aside className="profile-card">
-          <div className="card-heading">
-            <span>$</span>
-            <div><b>system.profile</b><small>Context changes the answer.</small></div>
-          </div>
-
-          <div className="system-chips" aria-label="Current system profile">
-            {profileChips.map((chip) => <span key={chip}>{chip}</span>)}
-          </div>
-
-          <label>Distribution<input value={profile.distro} onChange={(e) => update('distro', e.target.value)} /></label>
-          <label>Version<input value={profile.version} onChange={(e) => update('version', e.target.value)} /></label>
-          <label>Desktop / compositor<input value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} /></label>
-          <label>Session<input value={profile.session} onChange={(e) => update('session', e.target.value)} /></label>
-          <label>Hardware / notes<textarea rows={3} placeholder="RTX 3070 Ti, laptop model, etc." value={profile.hardware} onChange={(e) => update('hardware', e.target.value)} /></label>
-        </aside>
-
-        <section className="ask-card">
-          <div className="card-heading">
-            <span>&gt;_</span>
-            <div><b>troubleshoot.query</b><small>Ask like you would in a forum post.</small></div>
+        <div className="terminal-body">
+          <div className="boot">
+            <div><span className="prompt">mika@linux:~$</span> signpost --context-check</div>
+            <div className="headline">Linux troubleshooting that checks its work against your setup.</div>
+            <div className="muted">Sanity-grounded guidance for the distro, desktop, session, and hardware you actually use.</div>
           </div>
 
           <form onSubmit={submit}>
-            <textarea className="question" rows={6} value={question} onChange={(e) => setQuestion(e.target.value)} />
-            <div className="examples">
-              <span>Try</span>
-              {examples.map((item, i) => <button type="button" key={item} onClick={() => setQuestion(item)}>0{i + 1}</button>)}
+            <div className="command-line">
+              <span className="prompt">signpost@system:~$</span>
+              <span>profile --edit</span>
             </div>
-            <button className="submit" disabled={loading}>{loading ? 'resolving context…' : 'run context check ↵'}</button>
+
+            <div className="profile-grid">
+              <label>
+                <span>distro</span>
+                <input value={profile.distro} onChange={(e) => update('distro', e.target.value)} />
+              </label>
+              <label>
+                <span>version</span>
+                <input value={profile.version} onChange={(e) => update('version', e.target.value)} />
+              </label>
+              <label>
+                <span>desktop</span>
+                <input value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} />
+              </label>
+              <label>
+                <span>session</span>
+                <input value={profile.session} onChange={(e) => update('session', e.target.value)} />
+              </label>
+              <label className="hardware-field">
+                <span>hardware</span>
+                <input
+                  placeholder="RTX 3070 Ti, laptop model, etc."
+                  value={profile.hardware}
+                  onChange={(e) => update('hardware', e.target.value)}
+                />
+              </label>
+            </div>
+
+            <div className="context-line">
+              <span className="dim">context:</span> {profileSummary || 'incomplete'}
+              {profile.hardware ? <span className="dim"> · {profile.hardware}</span> : null}
+            </div>
+
+            <div className="command-line question-command">
+              <span className="prompt">signpost@system:~$</span>
+              <span>ask</span>
+            </div>
+
+            <textarea
+              className="question"
+              rows={5}
+              aria-label="Troubleshooting question"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+            />
+
+            <div className="example-line">
+              <span className="dim">examples:</span>
+              {examples.map((item, i) => (
+                <button type="button" key={item} onClick={() => setQuestion(item)}>[{i + 1}]</button>
+              ))}
+            </div>
+
+            <button className="run-command" disabled={loading}>
+              <span className="prompt">$</span> {loading ? 'checking context…' : 'run'}
+            </button>
           </form>
-        </section>
-      </section>
 
-      <section className={`answer-card ${answer || error || loading ? 'visible' : ''}`}>
-        <div className="answer-top">
-          <div><span className="status-dot"/> signpost.output</div>
-          <div className="answer-profile">{profileChips.map((chip) => <span key={chip}>{chip}</span>)}</div>
+          {(loading || error || answer) && (
+            <div className="output">
+              <div className="output-rule">── signpost output ─────────────────────────────────────────────</div>
+
+              {loading && (
+                <div className="loading-line">
+                  <span className="prompt">signpost&gt;</span> reading sources and checking applicability
+                  <span className="dots">...</span>
+                </div>
+              )}
+
+              {error && (
+                <div className="error">
+                  <div><span className="error-mark">!</span> request failed</div>
+                  <p>{error}</p>
+                  <small>Check your Sanity Context connection and selected model provider.</small>
+                </div>
+              )}
+
+              {meta && (
+                <div className="perf">
+                  <span>{(meta.totalMs / 1000).toFixed(1)}s total</span>
+                  <span>{(meta.contextMs / 1000).toFixed(1)}s context</span>
+                  <span>{(meta.modelMs / 1000).toFixed(1)}s model</span>
+                  <span>{meta.steps} steps</span>
+                  <span>{meta.toolCalls} tool calls</span>
+                </div>
+              )}
+
+              {answer && hasStructuredAnswer && (
+                <div className="answer-document">
+                  {(rightDirection || whyItFits) && (
+                    <section className="answer-section direction-section">
+                      <div className="section-label direction-label">✓ RIGHT_DIRECTION</div>
+                      {rightDirection && <div className="section-copy"><SectionCopy markdown={rightDirection.body}/></div>}
+                      {whyItFits && (
+                        <div className="why-panel">
+                          <div className="subsection-label">WHY_IT_FITS</div>
+                          <SectionCopy markdown={whyItFits.body}/>
+                        </div>
+                      )}
+                    </section>
+                  )}
+
+                  {wrongTurns && (
+                    <section className="answer-section wrong-section">
+                      <div className="section-label wrong-label">! WRONG_TURNS</div>
+                      <div className="section-copy"><SectionCopy markdown={wrongTurns.body}/></div>
+                    </section>
+                  )}
+
+                  {(confidence || sources) && (
+                    <div className="answer-footer">
+                      {confidence && (
+                        <section className="meta-section">
+                          <div className="meta-label">CONFIDENCE</div>
+                          <SectionCopy markdown={confidence.body}/>
+                        </section>
+                      )}
+                      {sources && (
+                        <section className="meta-section">
+                          <div className="meta-label">SOURCES</div>
+                          <SectionCopy markdown={sources.body}/>
+                        </section>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {answer && !hasStructuredAnswer && (
+                <article className="fallback-answer"><ReactMarkdown>{answer}</ReactMarkdown></article>
+              )}
+
+              {!loading && !error && answer && (
+                <div className="return-prompt"><span className="prompt">mika@linux:~$</span><span className="cursor" aria-hidden="true"/></div>
+              )}
+            </div>
+          )}
         </div>
-
-        {loading && (
-          <div className="loading-state">
-            <div className="loading-caption"><span className="prompt">signpost&gt;</span> reading documentation and checking applicability…</div>
-            <div className="loading-lines"><i/><i/><i/><i/></div>
-          </div>
-        )}
-
-        {error && <div className="error"><b>Connection isn’t ready yet.</b><p>{error}</p><small>Check the Sanity Context endpoint and model API key in .env.local.</small></div>}
-
-        {meta && (
-          <div className="perf">
-            <span>{(meta.totalMs / 1000).toFixed(1)}s total</span>
-            <span>{(meta.contextMs / 1000).toFixed(1)}s context</span>
-            <span>{(meta.modelMs / 1000).toFixed(1)}s model</span>
-            <span>{meta.steps} steps</span>
-            <span>{meta.toolCalls} tool calls</span>
-          </div>
-        )}
-
-        {answer && hasStructuredAnswer && (
-          <div className="answer-document">
-            {(rightDirection || whyItFits) && (
-              <section className="answer-section direction-section">
-                <div className="section-label direction-label"><span>✓</span> RIGHT_DIRECTION</div>
-                {rightDirection && <div className="section-copy"><SectionCopy markdown={rightDirection.body}/></div>}
-                {whyItFits && (
-                  <div className="why-panel">
-                    <div className="subsection-label">WHY_IT_FITS</div>
-                    <SectionCopy markdown={whyItFits.body}/>
-                  </div>
-                )}
-              </section>
-            )}
-
-            {wrongTurns && (
-              <section className="answer-section wrong-section">
-                <div className="section-label wrong-label"><span>!</span> WRONG_TURNS</div>
-                <div className="section-copy"><SectionCopy markdown={wrongTurns.body}/></div>
-              </section>
-            )}
-
-            {(confidence || sources) && (
-              <footer className="answer-footer">
-                {confidence && (
-                  <section className="meta-section confidence-section">
-                    <div className="meta-label">CONFIDENCE</div>
-                    <SectionCopy markdown={confidence.body}/>
-                  </section>
-                )}
-                {sources && (
-                  <section className="meta-section sources-section">
-                    <div className="meta-label">SOURCES</div>
-                    <SectionCopy markdown={sources.body}/>
-                  </section>
-                )}
-              </footer>
-            )}
-          </div>
-        )}
-
-        {answer && !hasStructuredAnswer && (
-          <article className="fallback-answer"><ReactMarkdown>{answer}</ReactMarkdown></article>
-        )}
       </section>
-
-        <section className="thesis">
-          <span className="prompt"># why-signpost</span>
-          <p>A Linux command can be technically correct and still be wrong for your machine.</p>
-          <p className="muted">Context is part of correctness.</p>
-        </section>
-
-        <footer className="site-footer">
-          <span>signpost v0.1</span>
-          <span>DEV × Sanity Challenge · Path One</span>
-        </footer>
-      </div>
     </main>
   );
 }
