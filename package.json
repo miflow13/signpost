@@ -10,13 +10,13 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.0",
     "@ai-sdk/mcp": "^1.0.0",
     "ai": "^6.0.0",
     "next": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-markdown": "^10.0.0"
+    "react-markdown": "^10.0.0",
+    "@ai-sdk/google": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
