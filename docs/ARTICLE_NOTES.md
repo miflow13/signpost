@@ -71,6 +71,21 @@ The first Knowledge Base is also named **Signpost Linux Desktop** and is intenti
 
 The initial five-source corpus was then added: upstream libinput documentation, ArchWiki pages for XInput/libinput context, and X.Org background. Keeping this first corpus small is deliberate: the goal is to make Wayland/X11 applicability easy to inspect before expanding into broader distro-specific troubleshooting.
 
+### First Knowledge Base snag: website crawl scope
+
+The first build exposed an important practical constraint. Even though the libinput source was added using the specific `ignoring-devices.html` page URL, Sanity's website crawler expanded that source into **139 indexed documents**. Combined with the rest of the organization, that pushed usage to **177 / 150 indexed documents**, disabling the build on the current plan.
+
+A second libinput API URL produced **0 documents** through the website crawler.
+
+Rather than upgrade the plan or broaden the corpus accidentally, the v0.1 strategy changed:
+
+- keep the small ArchWiki/X.Org pages as website sources,
+- remove the 139-document libinput website crawl,
+- save the exact two libinput pages as local HTML files,
+- upload those exact HTML files as **File** sources so each page remains bounded instead of turning into a site crawl.
+
+This is a useful design lesson for the article: "specific URL" does not necessarily mean "one indexed document" when the source type is a web crawler. Source type is part of retrieval design, not just ingestion plumbing.
+
 ### First test case
 
 Start intentionally narrow: **Wayland/X11 input-device troubleshooting**.
