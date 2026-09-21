@@ -169,3 +169,16 @@ The first bounded Knowledge Base build completed successfully and the generated 
 This matters because the initial source strategy was deliberately small and inspectable. After the earlier 139-document crawl problem, the corpus was rebuilt around three narrow website sources plus two exact uploaded libinput HTML files. Sanity then generated a clean entry set from that corpus without the runaway crawl behavior.
 
 At this point the project crossed an important milestone: Signpost now has a real, structured source layer that can be queried by the application rather than relying on placeholder retrieval logic.
+
+
+### Context MCP endpoint connected
+
+The organization-level Context Viewer token and a Knowledge Base-only MCP endpoint named `signpost` were created.
+
+Before involving the model, a dedicated `/api/health/context` route was added so the application can verify three things independently:
+
+1. the organization token authenticates,
+2. `/initial-context` is reachable,
+3. the MCP endpoint exposes Knowledge Base tools.
+
+This keeps debugging layered: if retrieval fails, Signpost can distinguish a Sanity configuration problem from a model/API problem instead of treating the whole agent call as one black box.
