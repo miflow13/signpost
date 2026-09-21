@@ -160,3 +160,12 @@ The v0.1 corpus at build time is intentionally small:
 - exact libinput device-configuration HTML uploaded as a file
 
 This is the first build intended to test the actual Signpost thesis: whether the indexed source set preserves enough context to distinguish X11/XInput advice from Wayland/libinput guidance without drowning the agent in unrelated Linux documentation.
+
+
+### First successful Knowledge Base build
+
+The first bounded Knowledge Base build completed successfully and the generated entries populated cleanly.
+
+This matters because the initial source strategy was deliberately small and inspectable. After the earlier 139-document crawl problem, the corpus was rebuilt around three narrow website sources plus two exact uploaded libinput HTML files. Sanity then generated a clean entry set from that corpus without the runaway crawl behavior.
+
+At this point the project crossed an important milestone: Signpost now has a real, structured source layer that can be queried by the application rather than relying on placeholder retrieval logic.
