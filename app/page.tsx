@@ -129,7 +129,7 @@ export default function Home() {
 
       <section className="hero">
         <div className="eyebrow">FIELD NOTE 01 · CONTEXT BEFORE COMMANDS</div>
-        <h1>Linux advice that knows<br/><span>which machine it’s talking to.</span></h1>
+        <h1>Linux troubleshooting that checks its work <span>against your setup.</span></h1>
         <p>
           Tell Signpost what you’re running. It checks the documentation against your actual
           distro, desktop, session, and hardware before pointing you toward a fix.
