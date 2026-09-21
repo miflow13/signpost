@@ -222,3 +222,14 @@ The first optimization pass therefore:
 - added step and tool-call counts to the UI.
 
 This gives us evidence before doing deeper optimization such as response streaming or MCP connection reuse.
+
+
+### First end-to-end Signpost answer
+
+Signpost produced its first complete source-grounded answer using the live Sanity Knowledge Base and Gemini tool loop.
+
+For the Fedora 44 + GNOME + Wayland benchmark, it selected a libinput/udev-based direction and explicitly marked `xinput disable` as a **Wrong turn** because the supplied session was Wayland. This was the first concrete proof of the project's core thesis: changing environmental context changes whether otherwise plausible Linux advice applies.
+
+The first answer also exposed useful quality work. It cited internal Knowledge Base entry names rather than the original source URLs, used a device-name-based udev match where upstream libinput demonstrates stable vendor/model identifiers, and used a few broader claims than the retrieved evidence warranted. Those findings were turned directly into stricter agent instructions rather than hand-editing the demo answer.
+
+The full benchmark review is tracked in `docs/BENCHMARKS.md`.
