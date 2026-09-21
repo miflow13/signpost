@@ -63,15 +63,15 @@ export default function Home() {
     <main>
       <nav>
         <div className="brand"><span>↗</span> Signpost</div>
-        <div className="nav-note">source-grounded Linux troubleshooting</div>
+        <div className="nav-note">Linux help, with context.</div>
       </nav>
 
       <section className="hero">
-        <div className="eyebrow">FIND THE RIGHT PATH FOR <em>YOUR</em> SYSTEM</div>
-        <h1>Stop following<br/><span>the wrong Linux directions.</span></h1>
+        <div className="eyebrow">CONTEXT BEFORE COMMANDS</div>
+        <h1>Linux advice that knows<br/><span>which machine it’s talking to.</span></h1>
         <p>
-          Signpost checks your distro, release, desktop, session, and hardware first —
-          then uses a Sanity Knowledge Base to point toward guidance that actually fits your system.
+          Tell Signpost what you’re running. It checks the documentation against your actual
+          distro, desktop, session, and hardware before pointing you toward a fix.
         </p>
       </section>
 
@@ -87,7 +87,7 @@ export default function Home() {
           <label>Desktop / compositor<input value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} /></label>
           <label>Session<input value={profile.session} onChange={(e) => update('session', e.target.value)} /></label>
           <label>Hardware / notes<textarea rows={3} placeholder="RTX 3070 Ti, laptop model, etc." value={profile.hardware} onChange={(e) => update('hardware', e.target.value)} /></label>
-          <div className="profile-chip">● {profileSummary || 'Incomplete profile'}</div>
+          <div className="profile-chip"><span>System</span>{profileSummary || 'Incomplete profile'}</div>
         </aside>
 
         <section className="ask-card">
@@ -101,14 +101,14 @@ export default function Home() {
             <div className="examples">
               {examples.map((item, i) => <button type="button" key={item} onClick={() => setQuestion(item)}>0{i + 1}</button>)}
             </div>
-            <button className="submit" disabled={loading}>{loading ? 'Checking the sources…' : 'Point me the right way →'}</button>
+            <button className="submit" disabled={loading}>{loading ? 'Reading the trail…' : 'Find the right direction →'}</button>
           </form>
         </section>
       </section>
 
       <section className={`answer-card ${answer || error || loading ? 'visible' : ''}`}>
         <div className="answer-top">
-          <div><span className="status-dot"/> Context check</div>
+          <div><span className="status-dot"/> Source-grounded answer</div>
           <code>{profileSummary}</code>
         </div>
         {loading && <div className="loading-lines"><i/><i/><i/><i/></div>}
@@ -126,9 +126,9 @@ export default function Home() {
       </section>
 
       <section className="thesis">
-        <span>THE THESIS</span>
-        <p>A Linux command can be technically correct and still point you down the wrong path.</p>
-        <p className="muted">Signpost treats context as part of correctness.</p>
+        <span>WHY SIGNPOST EXISTS</span>
+        <p>A Linux command can be technically correct and still be wrong for your machine.</p>
+        <p className="muted">Context is part of correctness.</p>
       </section>
 
       <footer>Built for the DEV × Sanity Challenge · Path One</footer>
