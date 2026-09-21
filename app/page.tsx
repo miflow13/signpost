@@ -1,6 +1,6 @@
 'use client';
 
-import {FormEvent, useMemo, useState} from 'react';
+import {FormEvent, KeyboardEvent, useMemo, useState} from 'react';
 import ReactMarkdown from 'react-markdown';
 import type {SystemProfile} from '@/lib/types';
 
@@ -13,9 +13,18 @@ const defaults: SystemProfile = {
 };
 
 const examples = [
-  'How do I disable my laptop keyboard without disabling my USB keyboard?',
-  'Why does an X11 xinput fix not work on my Wayland session?',
-  'Steam is flickering on NVIDIA. Which fixes actually apply to this setup?',
+  {
+    title: 'Keyboard on Wayland',
+    text: 'How do I disable my laptop keyboard without disabling my USB keyboard?',
+  },
+  {
+    title: 'X11 advice on Wayland',
+    text: 'Why does an X11 xinput fix not work on my Wayland session?',
+  },
+  {
+    title: 'NVIDIA troubleshooting',
+    text: 'Steam is flickering on NVIDIA. Which fixes actually apply to this setup?',
+  },
 ];
 
 type AnswerSection = {
@@ -70,14 +79,15 @@ function SectionCopy({markdown}: {markdown: string}) {
 
 export default function Home() {
   const [profile, setProfile] = useState<SystemProfile>(defaults);
-  const [question, setQuestion] = useState(examples[0]);
+  const [question, setQuestion] = useState('');
+  const [submittedQuestion, setSubmittedQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [meta, setMeta] = useState<RunMeta | null>(null);
 
   const profileSummary = useMemo(
-    () => [profile.distro, profile.version, profile.desktop, profile.session].filter(Boolean).join(' / '),
+    () => [profile.distro, profile.version, profile.desktop, profile.session].filter(Boolean).join(' · '),
     [profile],
   );
 
@@ -92,20 +102,30 @@ export default function Home() {
   const confidence = section('Confidence');
   const sources = section('Sources');
   const hasStructuredAnswer = Boolean(rightDirection || whyItFits || wrongTurns || confidence || sources);
+  const hasConversation = Boolean(submittedQuestion || answer || loading || error);
 
   function update<K extends keyof SystemProfile>(key: K, value: SystemProfile[K]) {
     setProfile((current) => ({...current, [key]: value}));
   }
 
-  function clearTerminal() {
+  function newChat() {
     setQuestion('');
+    setSubmittedQuestion('');
     setAnswer('');
     setError('');
     setMeta(null);
   }
 
+  function useExample(text: string) {
+    setQuestion(text);
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
+    const trimmed = question.trim();
+    if (!trimmed || loading) return;
+
+    setSubmittedQuestion(trimmed);
     setLoading(true);
     setError('');
     setAnswer('');
@@ -115,7 +135,7 @@ export default function Home() {
       const response = await fetch('/api/ask', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({question, profile}),
+        body: JSON.stringify({question: trimmed, profile}),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Request failed');
@@ -128,214 +148,224 @@ export default function Home() {
     }
   }
 
+  function handleComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
+  }
+
   return (
-    <main>
-      <div className="app-shell">
-        <aside className="sidebar">
-          <div className="sidebar-brand">
-            <span className="brand-mark">↗</span>
+    <main className="app">
+      <aside className="sidebar">
+        <div className="brand-row">
+          <div className="brand-logo">↗</div>
+          <div>
+            <strong>Signpost</strong>
+            <span>Linux troubleshooting</span>
+          </div>
+        </div>
+
+        <button className="new-chat" type="button" onClick={newChat}>
+          <span>＋</span> New chat
+        </button>
+
+        <section className="profile-panel">
+          <div className="panel-heading">
+            <span>Your setup</span>
+            <small>Used to check whether advice applies</small>
+          </div>
+
+          <label>
+            <span>Linux type</span>
+            <input value={profile.distro} onChange={(e) => update('distro', e.target.value)} />
+          </label>
+          <label>
+            <span>Version</span>
+            <input value={profile.version} onChange={(e) => update('version', e.target.value)} />
+          </label>
+          <label>
+            <span>Desktop</span>
+            <input value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} />
+          </label>
+          <label>
+            <span>Display mode</span>
+            <input value={profile.session} onChange={(e) => update('session', e.target.value)} />
+          </label>
+          <label>
+            <span>Hardware notes</span>
+            <input
+              placeholder="Optional"
+              value={profile.hardware}
+              onChange={(e) => update('hardware', e.target.value)}
+            />
+          </label>
+        </section>
+
+        <div className="sidebar-spacer"/>
+
+        <section className="connection-card">
+          <div className="connection-line">
+            <span className="status-dot"/>
             <div>
-              <strong>Signpost</strong>
-              <small>checks Linux advice against your setup</small>
+              <strong>{loading ? 'Checking sources…' : 'Sources connected'}</strong>
+              <small>Sanity Context Knowledge Base</small>
             </div>
           </div>
 
-          <section className="side-section">
-            <div className="side-heading">Your computer</div>
-
-            <label>
-              <span>Linux type</span>
-              <input value={profile.distro} onChange={(e) => update('distro', e.target.value)} />
-            </label>
-            <label>
-              <span>Version</span>
-              <input value={profile.version} onChange={(e) => update('version', e.target.value)} />
-            </label>
-            <label>
-              <span>Desktop</span>
-              <input value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} />
-            </label>
-            <label>
-              <span>Display mode</span>
-              <input value={profile.session} onChange={(e) => update('session', e.target.value)} />
-            </label>
-            <label>
-              <span>Hardware notes</span>
-              <input
-                placeholder="optional"
-                value={profile.hardware}
-                onChange={(e) => update('hardware', e.target.value)}
-              />
-            </label>
-
-            <div className="profile-summary">
-              <span className="status-led"/>
-              <div>
-                <small>Current setup</small>
-                <code>{profileSummary || 'incomplete'}</code>
-              </div>
+          {meta && (
+            <div className="runtime-meta">
+              {meta.provider && <span>{meta.provider}</span>}
+              {meta.model && <span>{meta.model}</span>}
+              <span>{(meta.totalMs / 1000).toFixed(1)}s</span>
+              <span>{meta.toolCalls} tool {meta.toolCalls === 1 ? 'call' : 'calls'}</span>
             </div>
-          </section>
+          )}
+        </section>
+      </aside>
 
-          <section className="side-section">
-            <div className="side-heading">Example questions</div>
-            <div className="example-list">
-              {examples.map((item, i) => (
-                <button type="button" key={item} onClick={() => setQuestion(item)}>
-                  <span>{String(i + 1).padStart(2, '0')}</span>
-                  <em>{item}</em>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="side-section side-status">
-            <div className="side-heading">Connection</div>
-            <div className="status-row"><span>Sources</span><strong>Connected</strong></div>
-            <div className="status-row"><span>Status</span><strong className={loading ? 'status-live' : 'status-ready'}>{loading ? 'Checking…' : 'Ready'}</strong></div>
-            {meta?.provider && <div className="status-row"><span>Provider</span><strong>{meta.provider}</strong></div>}
-            {meta?.model && <div className="status-row"><span>Model</span><strong>{meta.model}</strong></div>}
-            {meta && (
-              <>
-                <div className="status-row"><span>Total</span><strong>{(meta.totalMs / 1000).toFixed(1)}s</strong></div>
-                <div className="status-row"><span>Context</span><strong>{(meta.contextMs / 1000).toFixed(1)}s</strong></div>
-                <div className="status-row"><span>Tool calls</span><strong>{meta.toolCalls}</strong></div>
-              </>
-            )}
-          </section>
-
-          <div className="sidebar-foot">Signpost · source-grounded Linux help</div>
-        </aside>
-
-        <section className="terminal-window" aria-label="Signpost terminal">
-          <header className="mac-titlebar">
-            <div className="traffic-lights" aria-hidden="true">
-              <span className="traffic-red"/>
-              <span className="traffic-yellow"/>
-              <span className="traffic-green"/>
-            </div>
-            <div className="window-title">Signpost</div>
-            <div className="window-actions" aria-hidden="true">●</div>
-          </header>
-
-          <div className="terminal-toolbar">
-            <div className="terminal-tab">
-              <span className="terminal-icon">↗</span>
-              <span>Troubleshooting</span>
-            </div>
-
-            <div className="toolbar-context">
-              <span className="status-led"/>
-              <span>{profileSummary}</span>
-            </div>
-
-            <div className="toolbar-actions">
-              <button type="button" className="toolbar-button" onClick={clearTerminal}>Clear</button>
-              <button
-                type="submit"
-                form="signpost-form"
-                className="toolbar-button run-button"
-                disabled={loading || !question.trim()}
-              >
-                {loading ? 'Checking…' : 'Check this problem'}
-              </button>
-            </div>
+      <section className="chat-shell">
+        <header className="chat-header">
+          <div>
+            <strong>Signpost</strong>
+            <span>Checks Linux advice against your actual setup</span>
           </div>
 
-          <form id="signpost-form" className="terminal-form" onSubmit={submit}>
-            <div className="terminal-body">
-              <div className="intro-block">
-                <div className="stdout banner">What’s going wrong?</div>
-                <div className="stdout muted">Describe the Linux problem in your own words. Signpost will check the advice against the setup shown on the left.</div>
-              </div>
+          <div className="context-pills" aria-label="Current system context">
+            {[profile.distro && `${profile.distro} ${profile.version}`.trim(), profile.desktop, profile.session]
+              .filter(Boolean)
+              .map((item) => <span key={item}>{item}</span>)}
+          </div>
+        </header>
 
-              <div className="question-line">
-                <span className="continuation">› </span>
-                <textarea
-                  className="question"
-                  rows={4}
-                  aria-label="Troubleshooting question"
-                  placeholder="Example: My laptop keyboard won’t turn off, but I still need my USB keyboard to work."
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                />
-              </div>
+        <div className={`conversation ${hasConversation ? 'active' : 'empty'}`}>
+          {!hasConversation && (
+            <div className="welcome">
+              <div className="assistant-orb">↗</div>
+              <h1>What can I help you troubleshoot?</h1>
+              <p>
+                Ask a Linux question in plain English. Signpost checks the answer against
+                <strong> your setup</strong> before pointing you in a direction.
+              </p>
 
-              <div className="terminal-hint">
-                <span>No commands needed. Just describe the problem and click “Check this problem”.</span>
+              <div className="suggestion-grid">
+                {examples.map((example) => (
+                  <button type="button" key={example.title} onClick={() => useExample(example.text)}>
+                    <strong>{example.title}</strong>
+                    <span>{example.text}</span>
+                    <em>↗</em>
+                  </button>
+                ))}
               </div>
+            </div>
+          )}
+
+          {hasConversation && (
+            <div className="thread">
+              {submittedQuestion && (
+                <div className="message user-message">
+                  <div className="message-avatar user-avatar">You</div>
+                  <div className="message-content">
+                    <div className="message-name">You</div>
+                    <p>{submittedQuestion}</p>
+                  </div>
+                </div>
+              )}
 
               {(loading || error || answer) && (
-                <div className="output">
-                  <div className="stdout output-heading">Checking your setup and sources…</div>
-
-                  {loading && (
-                    <>
-                      <div className="stdout"><span className="info">●</span> Reading trusted Linux documentation…</div>
-                      <div className="stdout"><span className="info">●</span> Comparing it with {profileSummary}<span className="dots">...</span></div>
-                    </>
-                  )}
-
-                  {error && (
-                    <>
-                      <div className="stdout error"><span>[error]</span> request failed</div>
-                      <div className="stdout error-detail">{error}</div>
-                    </>
-                  )}
-
-                  {answer && hasStructuredAnswer && (
-                    <div className="answer-document">
-                      {(rightDirection || whyItFits) && (
-                        <section className="answer-section">
-                          <div className="stdout success">✓ Right direction</div>
-                          {rightDirection && <div className="section-copy"><SectionCopy markdown={rightDirection.body}/></div>}
-                          {whyItFits && (
-                            <div className="why-panel">
-                              <div className="stdout success">Why this fits your setup</div>
-                              <SectionCopy markdown={whyItFits.body}/>
-                            </div>
-                          )}
-                        </section>
-                      )}
-
-                      {wrongTurns && (
-                        <section className="answer-section">
-                          <div className="stdout skip">Things to avoid</div>
-                          <div className="section-copy"><SectionCopy markdown={wrongTurns.body}/></div>
-                        </section>
-                      )}
-
-                      {confidence && (
-                        <section className="answer-section meta-section">
-                          <div className="stdout meta">Confidence</div>
-                          <SectionCopy markdown={confidence.body}/>
-                        </section>
-                      )}
-
-                      {sources && (
-                        <section className="answer-section meta-section">
-                          <div className="stdout meta">Sources</div>
-                          <SectionCopy markdown={sources.body}/>
-                        </section>
-                      )}
+                <div className="message assistant-message">
+                  <div className="message-avatar assistant-avatar">↗</div>
+                  <div className="message-content">
+                    <div className="message-name">
+                      Signpost
+                      <span className="grounded-badge"><i/> Source-grounded</span>
                     </div>
-                  )}
 
-                  {answer && !hasStructuredAnswer && (
-                    <article className="fallback-answer"><ReactMarkdown>{answer}</ReactMarkdown></article>
-                  )}
+                    {loading && (
+                      <div className="thinking">
+                        <div className="thinking-dots"><i/><i/><i/></div>
+                        <span>Checking documentation against {profileSummary}…</span>
+                      </div>
+                    )}
 
-                  {!loading && !error && answer && (
-                    <div className="done-line">
-                      <span className="status-led"/> Ready for another question
-                    </div>
-                  )}
+                    {error && (
+                      <div className="error-card">
+                        <strong>I couldn’t finish that check.</strong>
+                        <p>{error}</p>
+                      </div>
+                    )}
+
+                    {answer && hasStructuredAnswer && (
+                      <div className="answer">
+                        {(rightDirection || whyItFits) && (
+                          <section className="answer-block right-direction">
+                            <div className="answer-label"><span>✓</span> Right direction</div>
+                            {rightDirection && <SectionCopy markdown={rightDirection.body}/>}
+                            {whyItFits && (
+                              <div className="why-it-fits">
+                                <div className="sub-label">Why it fits your setup</div>
+                                <SectionCopy markdown={whyItFits.body}/>
+                              </div>
+                            )}
+                          </section>
+                        )}
+
+                        {wrongTurns && (
+                          <section className="answer-block wrong-turns">
+                            <div className="answer-label"><span>!</span> Things to avoid</div>
+                            <SectionCopy markdown={wrongTurns.body}/>
+                          </section>
+                        )}
+
+                        {(confidence || sources) && (
+                          <div className="evidence-grid">
+                            {confidence && (
+                              <section>
+                                <div className="sub-label">Confidence</div>
+                                <SectionCopy markdown={confidence.body}/>
+                              </section>
+                            )}
+                            {sources && (
+                              <section>
+                                <div className="sub-label">Sources</div>
+                                <SectionCopy markdown={sources.body}/>
+                              </section>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {answer && !hasStructuredAnswer && (
+                      <div className="answer fallback-answer"><ReactMarkdown>{answer}</ReactMarkdown></div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
+          )}
+        </div>
+
+        <div className="composer-wrap">
+          <form className="composer" onSubmit={submit}>
+            <textarea
+              rows={1}
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={handleComposerKeyDown}
+              placeholder="Ask Signpost about a Linux problem…"
+              aria-label="Ask Signpost"
+            />
+            <button type="submit" className="send-button" disabled={loading || !question.trim()} aria-label="Send">
+              ↑
+            </button>
           </form>
-        </section>
-      </div>
+          <div className="composer-foot">
+            <span>Enter to send · Shift+Enter for a new line</span>
+            <span>{profileSummary}</span>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
