@@ -67,7 +67,7 @@ export default function Home() {
   const [meta, setMeta] = useState<{contextMs:number; modelMs:number; totalMs:number; steps:number; toolCalls:number} | null>(null);
 
   const profileSummary = useMemo(
-    () => [profile.distro, profile.version, profile.desktop, profile.session].filter(Boolean).join(' · '),
+    () => [profile.distro, profile.version, profile.desktop, profile.session].filter(Boolean).join(' / '),
     [profile],
   );
 
@@ -116,118 +116,117 @@ export default function Home() {
       <section className="terminal" aria-label="Signpost terminal">
         <header className="terminal-titlebar">
           <div className="window-controls" aria-hidden="true"><span/><span/><span/></div>
-          <span>signpost</span>
-          <span>~/signpost</span>
+          <span>mika@linux: ~/signpost</span>
+          <span>— □ ×</span>
         </header>
 
         <div className="terminal-body">
-          <div className="boot">
-            <div><span className="prompt">mika@linux:~$</span> signpost --context-check</div>
-            <div className="headline">Linux troubleshooting that checks its work against your setup.</div>
-            <div className="muted">Sanity-grounded guidance for the distro, desktop, session, and hardware you actually use.</div>
+          <div className="line">
+            <span className="prompt">mika@linux</span><span className="cwd"> ~/signpost</span><span className="shell"> $ </span>
+            <span>./signpost</span>
           </div>
+          <div className="stdout">Signpost 0.1.0 — context-aware Linux troubleshooting</div>
+          <div className="stdout dim">Linux troubleshooting that checks its work against your setup.</div>
+          <div className="blank"/>
 
           <form onSubmit={submit}>
-            <div className="command-line">
-              <span className="prompt">signpost@system:~$</span>
-              <span>profile --edit</span>
+            <div className="line">
+              <span className="prompt">mika@linux</span><span className="cwd"> ~/signpost</span><span className="shell"> $ </span>
+              <span>signpost profile --edit</span>
             </div>
 
-            <div className="profile-grid">
-              <label>
-                <span>distro</span>
-                <input value={profile.distro} onChange={(e) => update('distro', e.target.value)} />
+            <div className="config-block" aria-label="System profile">
+              <label className="config-line">
+                <span className="config-key">distro</span><span className="equals">=</span>
+                <input aria-label="Distribution" value={profile.distro} onChange={(e) => update('distro', e.target.value)} />
               </label>
-              <label>
-                <span>version</span>
-                <input value={profile.version} onChange={(e) => update('version', e.target.value)} />
+              <label className="config-line">
+                <span className="config-key">version</span><span className="equals">=</span>
+                <input aria-label="Version" value={profile.version} onChange={(e) => update('version', e.target.value)} />
               </label>
-              <label>
-                <span>desktop</span>
-                <input value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} />
+              <label className="config-line">
+                <span className="config-key">desktop</span><span className="equals">=</span>
+                <input aria-label="Desktop or compositor" value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} />
               </label>
-              <label>
-                <span>session</span>
-                <input value={profile.session} onChange={(e) => update('session', e.target.value)} />
+              <label className="config-line">
+                <span className="config-key">session</span><span className="equals">=</span>
+                <input aria-label="Session" value={profile.session} onChange={(e) => update('session', e.target.value)} />
               </label>
-              <label className="hardware-field">
-                <span>hardware</span>
+              <label className="config-line">
+                <span className="config-key">hardware</span><span className="equals">=</span>
                 <input
-                  placeholder="RTX 3070 Ti, laptop model, etc."
+                  aria-label="Hardware notes"
+                  placeholder="optional"
                   value={profile.hardware}
                   onChange={(e) => update('hardware', e.target.value)}
                 />
               </label>
             </div>
 
-            <div className="context-line">
-              <span className="dim">context:</span> {profileSummary || 'incomplete'}
-              {profile.hardware ? <span className="dim"> · {profile.hardware}</span> : null}
+            <div className="stdout dim">profile loaded: {profileSummary || 'incomplete'}{profile.hardware ? ` / ${profile.hardware}` : ''}</div>
+            <div className="blank"/>
+
+            <div className="line">
+              <span className="prompt">mika@linux</span><span className="cwd"> ~/signpost</span><span className="shell"> $ </span>
+              <span>signpost ask</span>
+            </div>
+            <div className="question-line">
+              <span className="continuation">&gt; </span>
+              <textarea
+                className="question"
+                rows={4}
+                aria-label="Troubleshooting question"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+              />
             </div>
 
-            <div className="command-line question-command">
-              <span className="prompt">signpost@system:~$</span>
-              <span>ask</span>
-            </div>
-
-            <textarea
-              className="question"
-              rows={5}
-              aria-label="Troubleshooting question"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-            />
-
-            <div className="example-line">
-              <span className="dim">examples:</span>
+            <div className="stdout dim example-line">
+              <span># examples </span>
               {examples.map((item, i) => (
                 <button type="button" key={item} onClick={() => setQuestion(item)}>[{i + 1}]</button>
               ))}
             </div>
 
-            <button className="run-command" disabled={loading}>
-              <span className="prompt">$</span> {loading ? 'checking context…' : 'run'}
-            </button>
+            <div className="line run-line">
+              <span className="prompt">mika@linux</span><span className="cwd"> ~/signpost</span><span className="shell"> $ </span>
+              <button className="run-command" disabled={loading}>
+                {loading ? 'signpost run --checking-context' : 'signpost run'}
+              </button>
+            </div>
           </form>
 
           {(loading || error || answer) && (
             <div className="output">
-              <div className="output-rule">── signpost output ─────────────────────────────────────────────</div>
-
               {loading && (
-                <div className="loading-line">
-                  <span className="prompt">signpost&gt;</span> reading sources and checking applicability
-                  <span className="dots">...</span>
-                </div>
+                <>
+                  <div className="stdout"><span className="info">[info]</span> querying Sanity Context Knowledge Base...</div>
+                  <div className="stdout"><span className="info">[info]</span> checking applicability against {profileSummary}<span className="dots">...</span></div>
+                </>
               )}
 
               {error && (
-                <div className="error">
-                  <div><span className="error-mark">!</span> request failed</div>
-                  <p>{error}</p>
-                  <small>Check your Sanity Context connection and selected model provider.</small>
-                </div>
+                <>
+                  <div className="stdout error"><span>[error]</span> request failed</div>
+                  <div className="stdout error-detail">{error}</div>
+                </>
               )}
 
               {meta && (
-                <div className="perf">
-                  <span>{(meta.totalMs / 1000).toFixed(1)}s total</span>
-                  <span>{(meta.contextMs / 1000).toFixed(1)}s context</span>
-                  <span>{(meta.modelMs / 1000).toFixed(1)}s model</span>
-                  <span>{meta.steps} steps</span>
-                  <span>{meta.toolCalls} tool calls</span>
+                <div className="stdout dim">
+                  [done] {meta.steps} steps · {meta.toolCalls} tool calls · {(meta.totalMs / 1000).toFixed(1)}s total · {(meta.contextMs / 1000).toFixed(1)}s context · {(meta.modelMs / 1000).toFixed(1)}s model
                 </div>
               )}
 
               {answer && hasStructuredAnswer && (
                 <div className="answer-document">
                   {(rightDirection || whyItFits) && (
-                    <section className="answer-section direction-section">
-                      <div className="section-label direction-label">✓ RIGHT_DIRECTION</div>
+                    <section className="answer-section">
+                      <div className="stdout success">[ok] right_direction</div>
                       {rightDirection && <div className="section-copy"><SectionCopy markdown={rightDirection.body}/></div>}
                       {whyItFits && (
                         <div className="why-panel">
-                          <div className="subsection-label">WHY_IT_FITS</div>
+                          <div className="stdout success">[ok] why_it_fits</div>
                           <SectionCopy markdown={whyItFits.body}/>
                         </div>
                       )}
@@ -235,27 +234,24 @@ export default function Home() {
                   )}
 
                   {wrongTurns && (
-                    <section className="answer-section wrong-section">
-                      <div className="section-label wrong-label">! WRONG_TURNS</div>
+                    <section className="answer-section">
+                      <div className="stdout warn">[skip] wrong_turns</div>
                       <div className="section-copy"><SectionCopy markdown={wrongTurns.body}/></div>
                     </section>
                   )}
 
-                  {(confidence || sources) && (
-                    <div className="answer-footer">
-                      {confidence && (
-                        <section className="meta-section">
-                          <div className="meta-label">CONFIDENCE</div>
-                          <SectionCopy markdown={confidence.body}/>
-                        </section>
-                      )}
-                      {sources && (
-                        <section className="meta-section">
-                          <div className="meta-label">SOURCES</div>
-                          <SectionCopy markdown={sources.body}/>
-                        </section>
-                      )}
-                    </div>
+                  {confidence && (
+                    <section className="answer-section meta-section">
+                      <div className="stdout meta">[meta] confidence</div>
+                      <SectionCopy markdown={confidence.body}/>
+                    </section>
+                  )}
+
+                  {sources && (
+                    <section className="answer-section meta-section">
+                      <div className="stdout meta">[meta] sources</div>
+                      <SectionCopy markdown={sources.body}/>
+                    </section>
                   )}
                 </div>
               )}
@@ -265,7 +261,13 @@ export default function Home() {
               )}
 
               {!loading && !error && answer && (
-                <div className="return-prompt"><span className="prompt">mika@linux:~$</span><span className="cursor" aria-hidden="true"/></div>
+                <>
+                  <div className="blank"/>
+                  <div className="line return-prompt">
+                    <span className="prompt">mika@linux</span><span className="cwd"> ~/signpost</span><span className="shell"> $ </span>
+                    <span className="cursor" aria-hidden="true"/>
+                  </div>
+                </>
               )}
             </div>
           )}
