@@ -233,3 +233,35 @@ For the Fedora 44 + GNOME + Wayland benchmark, it selected a libinput/udev-based
 The first answer also exposed useful quality work. It cited internal Knowledge Base entry names rather than the original source URLs, used a device-name-based udev match where upstream libinput demonstrates stable vendor/model identifiers, and used a few broader claims than the retrieved evidence warranted. Those findings were turned directly into stricter agent instructions rather than hand-editing the demo answer.
 
 The full benchmark review is tracked in `docs/BENCHMARKS.md`.
+
+
+### Local-model fallback after API quota
+
+During benchmark testing, the Gemini free API quota was exhausted. Instead of paying for more model access or changing the Sanity architecture, Signpost added a local-model path through **Ollama**.
+
+The model provider is now selectable with `AI_PROVIDER`:
+
+```text
+AI_PROVIDER=ollama  → local Qwen3 8B
+AI_PROVIDER=gemini  → hosted Gemini
+```
+
+For local testing, Signpost uses Ollama's OpenAI-compatible endpoint at `http://127.0.0.1:11434/v1` through the Vercel AI SDK's OpenAI-compatible provider. The default local model is `qwen3:8b`, which supports tool calling.
+
+This did not replace Sanity. The architecture during local testing is still:
+
+```text
+system profile + question
+        ↓
+local Qwen3 / Ollama
+        ↓
+Sanity Context MCP tool call
+        ↓
+Sanity Knowledge Base
+        ↓
+source-grounded Signpost answer
+```
+
+That separation was useful evidence that the model layer is genuinely replaceable. Sanity remains the retrieval/source-of-truth layer, while the reasoning runtime can be local or hosted.
+
+For faster local tests, the Qwen prompt requests non-thinking mode and focused retrieval. Gemini remains available as a configuration switch for a later hosted demo.
