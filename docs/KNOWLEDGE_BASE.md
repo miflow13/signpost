@@ -10,7 +10,7 @@ Use this as the Sanity Knowledge Base purpose:
 
 Do **not** crawl the entire Linux internet on day one. The strongest demo is a small, inspectable corpus with obvious context differences.
 
-Recommended first topic cluster: **desktop input + Wayland/X11 compatibility**.
+Recommended first topic cluster: **desktop input + Wayland/X11 compatibility**. Use `docs/SOURCE_SHORTLIST.md` for the initial five-source corpus.
 
 Suggested source categories:
 
