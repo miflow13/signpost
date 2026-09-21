@@ -24,6 +24,7 @@ export default function Home() {
   const [answer, setAnswer] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [meta, setMeta] = useState<{contextMs:number; modelMs:number; totalMs:number; steps:number; toolCalls:number} | null>(null);
 
   const profileSummary = useMemo(
     () => [profile.distro, profile.version, profile.desktop, profile.session].filter(Boolean).join(' · '),
@@ -39,6 +40,7 @@ export default function Home() {
     setLoading(true);
     setError('');
     setAnswer('');
+    setMeta(null);
 
     try {
       const response = await fetch('/api/ask', {
@@ -49,6 +51,7 @@ export default function Home() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Request failed');
       setAnswer(data.answer);
+      setMeta(data.meta ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -110,6 +113,15 @@ export default function Home() {
         </div>
         {loading && <div className="loading-lines"><i/><i/><i/><i/></div>}
         {error && <div className="error"><b>Connection isn’t ready yet.</b><p>{error}</p><small>Wire up the Sanity Context endpoint and API key in .env.local.</small></div>}
+        {meta && (
+          <div className="perf">
+            <span>{(meta.totalMs / 1000).toFixed(1)}s total</span>
+            <span>{(meta.contextMs / 1000).toFixed(1)}s context</span>
+            <span>{(meta.modelMs / 1000).toFixed(1)}s model</span>
+            <span>{meta.steps} steps</span>
+            <span>{meta.toolCalls} tool calls</span>
+          </div>
+        )}
         {answer && <article><ReactMarkdown>{answer}</ReactMarkdown></article>}
       </section>
 
