@@ -58,7 +58,8 @@ The first implementation includes:
 - structured Right direction / Wrong turns responses,
 - input normalization and length limits,
 - MCP client cleanup after each request,
-- challenge planning and demo documentation.
+- challenge planning and demo documentation,
+- Next.js 16 linting configured with ESLint flat config instead of the deprecated `next lint` command.
 
 ### First test case
 
