@@ -146,3 +146,17 @@ The expected demo is not merely that Signpost produces an answer. It should be a
 - Deployment URL.
 - Sanity project ID/public inspection information required by the challenge submission.
 - Final demo GIF/video.
+
+
+### First bounded Knowledge Base build
+
+After replacing the runaway website crawl with a bounded five-source setup, the first real Knowledge Base build was started.
+
+The v0.1 corpus at build time is intentionally small:
+- ArchWiki XInput
+- ArchWiki libinput
+- X.Org input-extension documentation
+- exact libinput "ignoring devices" HTML uploaded as a file
+- exact libinput device-configuration HTML uploaded as a file
+
+This is the first build intended to test the actual Signpost thesis: whether the indexed source set preserves enough context to distinguish X11/XInput advice from Wayland/libinput guidance without drowning the agent in unrelated Linux documentation.
