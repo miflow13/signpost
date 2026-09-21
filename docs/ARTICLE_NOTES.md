@@ -69,6 +69,8 @@ This was an important architectural checkpoint: Signpost does **not** need a tra
 
 The first Knowledge Base is also named **Signpost Linux Desktop** and is intentionally being kept narrow before any broad Linux documentation ingestion.
 
+The initial five-source corpus was then added: upstream libinput documentation, ArchWiki pages for XInput/libinput context, and X.Org background. Keeping this first corpus small is deliberate: the goal is to make Wayland/X11 applicability easy to inspect before expanding into broader distro-specific troubleshooting.
+
 ### First test case
 
 Start intentionally narrow: **Wayland/X11 input-device troubleshooting**.
