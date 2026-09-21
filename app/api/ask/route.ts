@@ -1,4 +1,4 @@
-import {anthropic} from '@ai-sdk/anthropic';
+import {google} from '@ai-sdk/google';
 import {generateText, stepCountIs} from 'ai';
 import {getSanityContext} from '@/lib/sanity-context';
 import {buildSystemPrompt} from '@/lib/system-prompt';
@@ -39,9 +39,9 @@ export async function POST(request: Request) {
     const context = await getSanityContext();
     mcpClient = context.client;
 
-    const modelName = process.env.AI_MODEL || 'claude-sonnet-4-6';
+    const modelName = process.env.AI_MODEL || 'gemini-3.8-flash';
     const result = await generateText({
-      model: anthropic(modelName),
+      model: google(modelName),
       system: buildSystemPrompt(profile, context.initialContext),
       tools: context.tools,
       stopWhen: stepCountIs(8),
