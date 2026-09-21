@@ -43,6 +43,16 @@ The Context MCP endpoint should be backed by the Knowledge Base only. The server
 
 ## Run locally
 
+Signpost can use a local Ollama model while still querying the live Sanity Context Knowledge Base.
+
+```bash
+# Install Ollama first if it is not already installed.
+ollama pull qwen3:8b
+ollama serve
+```
+
+In another terminal:
+
 ```bash
 cp .env.example .env.local
 npm install
@@ -53,14 +63,26 @@ Then open `http://localhost:3000`.
 
 ## Environment
 
+For local, no-cost model testing:
+
 ```bash
 SANITY_CONTEXT_MCP_URL=...
 SANITY_ORGANIZATION_TOKEN=...
-ANTHROPIC_API_KEY=...
-AI_MODEL=claude-sonnet-5
+
+AI_PROVIDER=ollama
+OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
+OLLAMA_MODEL=qwen3:8b
 ```
 
-The Sanity organization token needs **Context Viewer** permission and must remain server-side.
+To switch back to Gemini later:
+
+```bash
+AI_PROVIDER=gemini
+GOOGLE_GENERATIVE_AI_API_KEY=...
+AI_MODEL=gemini-3.8-flash
+```
+
+The Sanity organization token needs **Context Viewer** permission and must remain server-side. Ollama is only reachable from the machine running the Next.js server, so a Vercel deployment cannot use `localhost` as its model endpoint.
 
 ## Today
 
@@ -69,10 +91,10 @@ Read these in order:
 1. `docs/KNOWLEDGE_BASE.md`
 2. `docs/CHALLENGE_PLAN.md`
 3. `docs/DEMO_SCRIPT.md`
+4. `docs/ARTICLE_NOTES.md` — running build log for the eventual DEV article
 
 Then create the Sanity project + first focused Knowledge Base. Do not broaden the corpus until one conflict-heavy demo question works end to end.
 
 ## Challenge submission note
 
 The DEV challenge requires the submission to include the Sanity project ID or a public dataset URL so the Sanity team can inspect how structured content was used. Add that before publishing.
-# signpost
