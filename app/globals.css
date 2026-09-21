@@ -722,3 +722,66 @@ main {
     font-size: 12px;
   }
 }
+
+
+/* Beginner-friendly terminal presentation */
+.intro-block {
+  margin-bottom: 18px;
+}
+
+.intro-block .banner {
+  margin-bottom: 4px;
+  color: #f5f7f6;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.output-heading {
+  margin-bottom: 8px;
+  color: #dfe4e1;
+  font-weight: 600;
+}
+
+.done-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.terminal-hint {
+  max-width: 720px;
+}
+
+.terminal-hint span {
+  line-height: 1.45;
+}
+
+.toolbar-button.run-button {
+  min-width: 132px;
+  text-align: center;
+}
+
+.sidebar-brand strong {
+  font-size: 14px;
+}
+
+.side-heading {
+  text-transform: none;
+  letter-spacing: .06em;
+  font-size: 10px;
+}
+
+.side-section label > span {
+  color: #a2a9ac;
+}
+
+.example-list button em {
+  font-size: 10px;
+}
+
+.question {
+  font-size: 14px;
+}
