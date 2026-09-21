@@ -36,19 +36,44 @@ export async function POST(request: Request) {
     }
 
     const profile = normalizeProfile(body.profile);
+
+    const startedAt = performance.now();
+    const contextStartedAt = performance.now();
     const context = await getSanityContext();
+    const contextMs = performance.now() - contextStartedAt;
     mcpClient = context.client;
 
     const modelName = process.env.AI_MODEL || 'gemini-3.8-flash';
+    const modelStartedAt = performance.now();
     const result = await generateText({
       model: google(modelName),
       system: buildSystemPrompt(profile, context.initialContext),
       tools: context.tools,
-      stopWhen: stepCountIs(8),
+      stopWhen: stepCountIs(4),
       prompt: question,
     });
 
-    return Response.json({answer: result.text});
+    const modelMs = performance.now() - modelStartedAt;
+    const totalMs = performance.now() - startedAt;
+
+    console.info('[Signpost timing]', {
+      contextMs: Math.round(contextMs),
+      modelMs: Math.round(modelMs),
+      totalMs: Math.round(totalMs),
+      steps: result.steps.length,
+      toolCalls: result.steps.reduce((count, step) => count + step.toolCalls.length, 0),
+    });
+
+    return Response.json({
+      answer: result.text,
+      meta: {
+        contextMs: Math.round(contextMs),
+        modelMs: Math.round(modelMs),
+        totalMs: Math.round(totalMs),
+        steps: result.steps.length,
+        toolCalls: result.steps.reduce((count, step) => count + step.toolCalls.length, 0),
+      },
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown server error';
     console.error('[Signpost]', error);
