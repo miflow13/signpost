@@ -61,6 +61,14 @@ The first implementation includes:
 - challenge planning and demo documentation,
 - Next.js 16 linting configured with ESLint flat config instead of the deprecated `next lint` command.
 
+### Sanity project milestone
+
+The Sanity project **Signpost Linux Desktop** was created and the organization-level **Context / Knowledge Bases** feature was enabled.
+
+This was an important architectural checkpoint: Signpost does **not** need a traditional Sanity Studio or CMS schema for the v0.1 demo. The product is using Sanity as the retrieval and context layer, so the next work happens inside the organization-level Context app.
+
+The first Knowledge Base is also named **Signpost Linux Desktop** and is intentionally being kept narrow before any broad Linux documentation ingestion.
+
 ### First test case
 
 Start intentionally narrow: **Wayland/X11 input-device troubleshooting**.
@@ -95,6 +103,7 @@ The expected demo is not merely that Signpost produces an answer. It should be a
 - First successful Right direction response.
 - A visible Wrong turn for incompatible X11 advice.
 - Same question after changing Wayland → X11.
+- Sanity project-created screen.
 - Sanity Knowledge Base outline.
 - Sanity Issues/conflict-resolution view, if a useful real conflict appears.
 - The Context MCP configuration showing Knowledge Base-only sources (with secrets hidden).
