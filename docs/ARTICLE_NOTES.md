@@ -208,3 +208,17 @@ Implementation changes:
 - default model changed to `gemini-3.8-flash`
 
 This also made the v0.1 challenge demo possible without adding a paid API dependency.
+
+
+### First performance diagnosis
+
+The first Context health check returned successfully in about **2.4 seconds**, including `/initial-context` retrieval and MCP tool discovery. That ruled out Sanity as the main source of the perceived latency.
+
+The remaining delay was in the model/tool loop. The initial agent configuration allowed up to eight steps and used a non-streaming `generateText()` response, which meant the interface showed nothing until retrieval, tool calls, and final generation had all completed.
+
+The first optimization pass therefore:
+- reduced the maximum agent loop from 8 steps to 4,
+- added per-request timing for Context setup, model/tool work, and total response time,
+- added step and tool-call counts to the UI.
+
+This gives us evidence before doing deeper optimization such as response streaming or MCP connection reuse.
