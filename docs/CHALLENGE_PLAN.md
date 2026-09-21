@@ -43,7 +43,7 @@ A command can therefore be "correct" and still be wrong for the user's machine.
 - [x] Running article/build log
 - [ ] Create Sanity project
 - [ ] Enable Context + Knowledge Bases
-- [ ] Add 4–8 focused sources
+- [x] Add 4–8 focused sources
 - [ ] Build Knowledge Base
 - [ ] Resolve/document at least one real conflict
 - [ ] Connect live endpoint
