@@ -13,24 +13,12 @@ const defaults: SystemProfile = {
 };
 
 const examples = [
-  {
-    title: 'Keyboard on Wayland',
-    text: 'How do I disable my laptop keyboard without disabling my USB keyboard?',
-  },
-  {
-    title: 'X11 advice on Wayland',
-    text: 'Why does an X11 xinput fix not work on my Wayland session?',
-  },
-  {
-    title: 'NVIDIA troubleshooting',
-    text: 'Steam is flickering on NVIDIA. Which fixes actually apply to this setup?',
-  },
+  'Disable my laptop keyboard but keep my USB keyboard working',
+  'Why does xinput advice fail on Wayland?',
+  'Steam flickers on NVIDIA — what actually applies to my setup?',
 ];
 
-type AnswerSection = {
-  title: string;
-  body: string;
-};
+type AnswerSection = { title: string; body: string };
 
 type RunMeta = {
   contextMs: number;
@@ -85,9 +73,12 @@ export default function Home() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [meta, setMeta] = useState<RunMeta | null>(null);
+  const [setupOpen, setSetupOpen] = useState(false);
 
   const profileSummary = useMemo(
-    () => [profile.distro, profile.version, profile.desktop, profile.session].filter(Boolean).join(' · '),
+    () => [profile.distro, profile.version, profile.desktop, profile.session]
+      .filter(Boolean)
+      .join(' · '),
     [profile],
   );
 
@@ -157,215 +148,203 @@ export default function Home() {
 
   return (
     <main className="app">
-      <aside className="sidebar">
-        <div className="brand-row">
-          <div className="brand-logo">↗</div>
-          <div>
-            <strong>Signpost</strong>
-            <span>Linux troubleshooting</span>
-          </div>
-        </div>
-
-        <button className="new-chat" type="button" onClick={newChat}>
-          <span>＋</span> New chat
+      <header className="topbar">
+        <button className="brand" type="button" onClick={newChat} aria-label="New Signpost chat">
+          <span className="brand-mark">↗</span>
+          <span>Signpost</span>
         </button>
 
-        <section className="profile-panel">
-          <div className="panel-heading">
-            <span>Your setup</span>
-            <small>Used to check whether advice applies</small>
-          </div>
-
-          <label>
-            <span>Linux type</span>
-            <input value={profile.distro} onChange={(e) => update('distro', e.target.value)} />
-          </label>
-          <label>
-            <span>Version</span>
-            <input value={profile.version} onChange={(e) => update('version', e.target.value)} />
-          </label>
-          <label>
-            <span>Desktop</span>
-            <input value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} />
-          </label>
-          <label>
-            <span>Display mode</span>
-            <input value={profile.session} onChange={(e) => update('session', e.target.value)} />
-          </label>
-          <label>
-            <span>Hardware notes</span>
-            <input
-              placeholder="Optional"
-              value={profile.hardware}
-              onChange={(e) => update('hardware', e.target.value)}
-            />
-          </label>
-        </section>
-
-        <div className="sidebar-spacer"/>
-
-        <section className="connection-card">
-          <div className="connection-line">
+        <div className="top-actions">
+          <button className="ghost-button" type="button" onClick={newChat}>New chat</button>
+          <button className="setup-button" type="button" onClick={() => setSetupOpen((open) => !open)}>
             <span className="status-dot"/>
-            <div>
-              <strong>{loading ? 'Checking sources…' : 'Sources connected'}</strong>
-              <small>Sanity Context Knowledge Base</small>
-            </div>
-          </div>
+            {profileSummary}
+            <span className="chevron">⌄</span>
+          </button>
+        </div>
 
-          {meta && (
-            <div className="runtime-meta">
-              {meta.provider && <span>{meta.provider}</span>}
-              {meta.model && <span>{meta.model}</span>}
-              <span>{(meta.totalMs / 1000).toFixed(1)}s</span>
-              <span>{meta.toolCalls} tool {meta.toolCalls === 1 ? 'call' : 'calls'}</span>
-            </div>
-          )}
-        </section>
-      </aside>
-
-      <section className="chat-shell">
-        <header className="chat-header">
-          <div>
-            <strong>Signpost</strong>
-            <span>Checks Linux advice against your actual setup</span>
-          </div>
-
-          <div className="context-pills" aria-label="Current system context">
-            {[profile.distro && `${profile.distro} ${profile.version}`.trim(), profile.desktop, profile.session]
-              .filter(Boolean)
-              .map((item) => <span key={item}>{item}</span>)}
-          </div>
-        </header>
-
-        <div className={`conversation ${hasConversation ? 'active' : 'empty'}`}>
-          {!hasConversation && (
-            <div className="welcome">
-              <div className="assistant-orb">↗</div>
-              <h1>What can I help you troubleshoot?</h1>
-              <p>
-                Ask a Linux question in plain English. Signpost checks the answer against
-                <strong> your setup</strong> before pointing you in a direction.
-              </p>
-
-              <div className="suggestion-grid">
-                {examples.map((example) => (
-                  <button type="button" key={example.title} onClick={() => useExample(example.text)}>
-                    <strong>{example.title}</strong>
-                    <span>{example.text}</span>
-                    <em>↗</em>
-                  </button>
-                ))}
+        {setupOpen && (
+          <div className="setup-popover">
+            <div className="setup-heading">
+              <div>
+                <strong>Your setup</strong>
+                <span>Signpost uses this to decide which fixes actually apply.</span>
               </div>
+              <button type="button" onClick={() => setSetupOpen(false)}>×</button>
             </div>
-          )}
 
-          {hasConversation && (
-            <div className="thread">
-              {submittedQuestion && (
-                <div className="message user-message">
-                  <div className="message-avatar user-avatar">You</div>
-                  <div className="message-content">
-                    <div className="message-name">You</div>
-                    <p>{submittedQuestion}</p>
+            <div className="setup-grid">
+              <label>
+                <span>Linux type</span>
+                <input value={profile.distro} onChange={(e) => update('distro', e.target.value)} />
+              </label>
+              <label>
+                <span>Version</span>
+                <input value={profile.version} onChange={(e) => update('version', e.target.value)} />
+              </label>
+              <label>
+                <span>Desktop</span>
+                <input value={profile.desktop} onChange={(e) => update('desktop', e.target.value)} />
+              </label>
+              <label>
+                <span>Display mode</span>
+                <input value={profile.session} onChange={(e) => update('session', e.target.value)} />
+              </label>
+              <label className="wide-field">
+                <span>Hardware notes</span>
+                <input
+                  placeholder="Optional"
+                  value={profile.hardware}
+                  onChange={(e) => update('hardware', e.target.value)}
+                />
+              </label>
+            </div>
+          </div>
+        )}
+      </header>
+
+      <section className={`conversation ${hasConversation ? 'has-thread' : 'empty'}`}>
+        {!hasConversation && (
+          <div className="welcome">
+            <div className="assistant-orb">↗</div>
+            <h1>What are you trying to fix?</h1>
+            <p>Linux troubleshooting that checks whether the advice actually fits your setup.</p>
+          </div>
+        )}
+
+        {hasConversation && (
+          <div className="thread">
+            {submittedQuestion && (
+              <div className="user-row">
+                <div className="user-bubble">{submittedQuestion}</div>
+              </div>
+            )}
+
+            <div className="assistant-row">
+              <div className="assistant-avatar">↗</div>
+
+              <div className="assistant-card">
+                <div className="assistant-card-head">
+                  <div>
+                    <strong>Signpost</strong>
+                    <span><i/> Source-grounded</span>
                   </div>
+
+                  <button className="mini-setup" type="button" onClick={() => setSetupOpen(true)}>
+                    {profileSummary}
+                  </button>
                 </div>
-              )}
 
-              {(loading || error || answer) && (
-                <div className="message assistant-message">
-                  <div className="message-avatar assistant-avatar">↗</div>
-                  <div className="message-content">
-                    <div className="message-name">
-                      Signpost
-                      <span className="grounded-badge"><i/> Source-grounded</span>
-                    </div>
+                {loading && (
+                  <div className="thinking">
+                    <div className="thinking-dots"><i/><i/><i/></div>
+                    <span>Checking documentation against your setup…</span>
+                  </div>
+                )}
 
-                    {loading && (
-                      <div className="thinking">
-                        <div className="thinking-dots"><i/><i/><i/></div>
-                        <span>Checking documentation against {profileSummary}…</span>
-                      </div>
-                    )}
+                {error && (
+                  <div className="error-card">
+                    <strong>I couldn’t finish that check.</strong>
+                    <p>{error}</p>
+                  </div>
+                )}
 
-                    {error && (
-                      <div className="error-card">
-                        <strong>I couldn’t finish that check.</strong>
-                        <p>{error}</p>
-                      </div>
-                    )}
-
-                    {answer && hasStructuredAnswer && (
-                      <div className="answer">
-                        {(rightDirection || whyItFits) && (
-                          <section className="answer-block right-direction">
-                            <div className="answer-label"><span>✓</span> Right direction</div>
-                            {rightDirection && <SectionCopy markdown={rightDirection.body}/>}
-                            {whyItFits && (
-                              <div className="why-it-fits">
-                                <div className="sub-label">Why it fits your setup</div>
-                                <SectionCopy markdown={whyItFits.body}/>
-                              </div>
-                            )}
-                          </section>
-                        )}
-
-                        {wrongTurns && (
-                          <section className="answer-block wrong-turns">
-                            <div className="answer-label"><span>!</span> Things to avoid</div>
-                            <SectionCopy markdown={wrongTurns.body}/>
-                          </section>
-                        )}
-
-                        {(confidence || sources) && (
-                          <div className="evidence-grid">
-                            {confidence && (
-                              <section>
-                                <div className="sub-label">Confidence</div>
-                                <SectionCopy markdown={confidence.body}/>
-                              </section>
-                            )}
-                            {sources && (
-                              <section>
-                                <div className="sub-label">Sources</div>
-                                <SectionCopy markdown={sources.body}/>
-                              </section>
-                            )}
+                {answer && hasStructuredAnswer && (
+                  <div className="answer">
+                    {(rightDirection || whyItFits) && (
+                      <section className="answer-section">
+                        <div className="answer-label right-label">✓ Right direction</div>
+                        {rightDirection && <SectionCopy markdown={rightDirection.body}/>}
+                        {whyItFits && (
+                          <div className="nested-section">
+                            <div className="sub-label">Why it fits your setup</div>
+                            <SectionCopy markdown={whyItFits.body}/>
                           </div>
                         )}
-                      </div>
+                      </section>
                     )}
 
-                    {answer && !hasStructuredAnswer && (
-                      <div className="answer fallback-answer"><ReactMarkdown>{answer}</ReactMarkdown></div>
+                    {wrongTurns && (
+                      <section className="answer-section">
+                        <div className="answer-label wrong-label">Things to avoid</div>
+                        <SectionCopy markdown={wrongTurns.body}/>
+                      </section>
+                    )}
+
+                    {confidence && (
+                      <section className="answer-section compact-section">
+                        <div className="sub-label">Confidence</div>
+                        <SectionCopy markdown={confidence.body}/>
+                      </section>
+                    )}
+
+                    {sources && (
+                      <section className="answer-section compact-section">
+                        <div className="sub-label">Sources</div>
+                        <SectionCopy markdown={sources.body}/>
+                      </section>
                     )}
                   </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                )}
 
-        <div className="composer-wrap">
-          <form className="composer" onSubmit={submit}>
-            <textarea
-              rows={1}
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              onKeyDown={handleComposerKeyDown}
-              placeholder="Ask Signpost about a Linux problem…"
-              aria-label="Ask Signpost"
-            />
-            <button type="submit" className="send-button" disabled={loading || !question.trim()} aria-label="Send">
+                {answer && !hasStructuredAnswer && (
+                  <div className="answer fallback-answer"><ReactMarkdown>{answer}</ReactMarkdown></div>
+                )}
+
+                {meta && (
+                  <details className="details">
+                    <summary>Details</summary>
+                    <div>
+                      {meta.provider && <span>{meta.provider}</span>}
+                      {meta.model && <span>{meta.model}</span>}
+                      <span>{(meta.totalMs / 1000).toFixed(1)}s</span>
+                      <span>{meta.toolCalls} tool {meta.toolCalls === 1 ? 'call' : 'calls'}</span>
+                    </div>
+                  </details>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      <div className="composer-zone">
+        <form className="composer" onSubmit={submit}>
+          <textarea
+            rows={1}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={handleComposerKeyDown}
+            placeholder="Describe your Linux problem…"
+            aria-label="Ask Signpost"
+          />
+
+          <div className="composer-actions">
+            <button className="context-button" type="button" onClick={() => setSetupOpen(true)}>
+              <span className="status-dot"/>
+              {profileSummary}
+            </button>
+
+            <button className="send-button" type="submit" disabled={loading || !question.trim()} aria-label="Check this">
               ↑
             </button>
-          </form>
-          <div className="composer-foot">
-            <span>Enter to send · Shift+Enter for a new line</span>
-            <span>{profileSummary}</span>
           </div>
+        </form>
+
+        {!hasConversation && (
+          <div className="prompt-suggestions">
+            {examples.map((example) => (
+              <button type="button" key={example} onClick={() => useExample(example)}>
+                {example}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="composer-note">
+          Signpost checks whether a fix actually applies to your setup.
         </div>
-      </section>
+      </div>
     </main>
   );
 }
